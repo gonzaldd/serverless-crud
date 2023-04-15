@@ -41,24 +41,36 @@ functions:
       - http:
           path: users/{id}
           method: GET
+    package:
+      patterns:
+        - "getUsers/handler.js"
   create-users:
     handler: createUsers/handler.createUsers
     events:
       - http:
           path: users
           method: POST
+    package:
+      patterns:
+        - "createUser/handler.js"
   update-users:
     handler: updateUsers/handler.updateUsers
     events:
       - http:
           path: users/{id}
           method: PATCH
+    package:
+      patterns:
+        - "updateUser/handler.js"
   delete-users:
     handler: deleteUsers/handler.deleteUsers
     events:
       - http:
           path: users/{id}
           method: DELETE
+    package:
+      patterns:
+        - "deleteUser/handler.js"
 
 resources:
   Resources:
