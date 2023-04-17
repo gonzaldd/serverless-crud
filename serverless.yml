@@ -9,6 +9,11 @@ provider:
         - Effect: Allow
           Action: "dynamodb:*"
           Resource: arn:aws:dynamodb:us-east-1:676931044121:table/crud-serverless-table
+        - Effect: Allow
+          Action: "s3:*"
+          Resource: arn:aws:s3:::bucket-serveless-course-p2023/*
+  environment:
+    BUCKET: bucket-serveless-course-p2023
 
 plugins:
   - serverless-offline
@@ -88,6 +93,19 @@ functions:
     package:
       patterns:
         - "deleteUser/handler.js"
+  signed-url:
+    handler: signedUrl/handler.signedS3URL
+    package:
+      patterns:
+        - "signedUrl/handler.js"
+    events:
+      - http:
+          path: signed-url
+          method: GET
+          request:
+            parameters:
+              querystrings:
+                filename: true
 
 resources:
   Resources:
@@ -104,3 +122,24 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    S3Bucket:
+      Type: "AWS::S3::Bucket"
+      Properties:
+        AccessControl: PublicRead
+        BucketName: bucket-serveless-course-p2023
+    SampleBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref S3Bucket
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Action:
+                - "s3:GetObject"
+              Effect: Allow
+              Resource: !Join
+                - ""
+                - - "arn:aws:s3:::"
+                  - !Ref S3Bucket
+                  - /*
+              Principal: "*"
