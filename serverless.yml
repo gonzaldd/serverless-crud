@@ -3,6 +3,9 @@ service: crud-serveless
 provider:
   name: aws
   runtime: nodejs14.x
+  apiGateway:
+    apiKeys:
+      - crud-serverless-users-apikey
   iam:
     role:
       statements:
@@ -14,6 +17,7 @@ provider:
           Resource: arn:aws:s3:::bucket-serveless-course-p2023/*
   environment:
     BUCKET: bucket-serveless-course-p2023
+    SECRET_EGG: ${ssm:/SECRET_EGG}
 
 # plugins:
 #   - serverless-offline
@@ -41,10 +45,16 @@ custom:
   #  httpPort: 9090
 
 functions:
+  custom-authorizer:
+    handler: authorizer/handler.authorize
+    package:
+      patterns:
+        - "authorizer/handler.js"
   get-users:
     handler: getUsers/handler.getUsers
     events:
       - http:
+          private: true
           path: users/{id}
           method: GET
           request:
@@ -59,13 +69,16 @@ functions:
     events:
       - http:
           path: users
+          authorizer:
+            name: custom-authorizer
+            resultTtlInSeconds: 15
           method: POST
           request:
             schemas:
               application/json: ${file(schemas/user-schema.json)}
     package:
       patterns:
-        - "createUser/handler.js"
+        - "createUsers/handler.js"
   update-users:
     handler: updateUsers/handler.updateUsers
     events:
@@ -80,7 +93,7 @@ functions:
               application/json: ${file(schemas/user-schema.json)}
     package:
       patterns:
-        - "updateUser/handler.js"
+        - "updateUsers/handler.js"
   delete-users:
     handler: deleteUsers/handler.deleteUsers
     events:
@@ -93,7 +106,7 @@ functions:
                 id: true
     package:
       patterns:
-        - "deleteUser/handler.js"
+        - "deleteUsers/handler.js"
   signed-url:
     handler: signedUrl/handler.signedS3URL
     package:
