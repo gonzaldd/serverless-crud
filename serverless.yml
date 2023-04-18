@@ -11,7 +11,7 @@ provider:
       statements:
         - Effect: Allow
           Action: "dynamodb:*"
-          Resource: arn:aws:dynamodb:us-east-1:676931044121:table/crud-serverless-table
+          Resource: arn:aws:dynamodb:us-east-1:676931044121:table/usersTable
         - Effect: Allow
           Action: "s3:*"
           Resource: arn:aws:s3:::bucket-serveless-course-p2023/*
@@ -22,6 +22,10 @@ provider:
 # plugins:
 #   - serverless-offline
 #   - serverless-dynamodb-local
+
+plugins:
+  - serverless-apigateway-service-proxy
+  - serverless-lift
 
 package:
   individually: true
@@ -43,6 +47,38 @@ custom:
     # noStart: true
   #serverless-offline:
   #  httpPort: 9090
+  apiGatewayServiceProxies:
+    - sqs:
+        path: /likeUser
+        method: post
+        queueName: likequeue
+        cors: true
+        response:
+          template:
+            # `success` is used when the integration response is 200
+            success: |-
+              { "message": "accepted" }
+            # `clientError` is used when the integration response is 400
+            clientError: |-
+              { "message": "there is an error in your request" }
+            # `serverError` is used when the integration response is 500
+            serverError: |-
+              { "message": "there was an error handling your request" }
+
+constructs:
+  sqs-queue:
+    type: queue
+    #batchSize: 1
+    worker:
+      handler: likeuser/handler.likeuser
+      #reservedConcurrency: 1
+      package:
+        patterns:
+          - "likeuser/handler.js"
+    extensions:
+      queue:
+        Properties:
+          QueueName: likequeue
 
 functions:
   custom-authorizer:
@@ -148,7 +184,7 @@ resources:
     usersTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: crud-serverless-table
+        TableName: usersTable
         AttributeDefinitions:
           - AttributeName: pk
             AttributeType: S
