@@ -16,7 +16,7 @@ const updateUsers = async (event, context) => {
   const body = JSON.parse(event.body);
 
   const params = {
-    TableName: "crud-serverless-table",
+    TableName: "usersTable",
     Key: { pk: userId },
     UpdateExpression: "set #name = :name, #phone = :phone",
     ExpressionAttributeNames: { "#name": "name", "#phone": "phone" },

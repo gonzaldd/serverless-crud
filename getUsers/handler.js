@@ -17,7 +17,7 @@ const getUsers = async (event, context) => {
   const params = {
     ExpressionAttributeValues: { ":pk": userId },
     KeyConditionExpression: "pk = :pk",
-    TableName: "crud-serverless-table",
+    TableName: "usersTable",
   };
 
   try {

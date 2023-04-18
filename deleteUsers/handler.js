@@ -16,7 +16,7 @@ const deleteUsers = async (event, context) => {
 
   const params = {
     Key: { pk: userId },
-    TableName: "crud-serverless-table",
+    TableName: "usersTable",
     ReturnValues: "ALL_OLD",
   };
 

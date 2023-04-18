@@ -19,7 +19,7 @@ const createUsers = async (event, context) => {
   userBody.pk = id;
 
   const params = {
-    TableName: "crud-serverless-table",
+    TableName: "usersTable",
     Item: userBody,
   };
 
